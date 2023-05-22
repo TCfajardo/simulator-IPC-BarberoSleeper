@@ -36,7 +36,6 @@ class Client:
 
     def get_cliente_id(self):
         """Returns the ID of the client.
-
         Returns:
             int: The ID of the client.
         """
@@ -44,7 +43,6 @@ class Client:
 
     def get_tiempo_llegada(self):
         """Returns the arrival time of the client.
-
         Returns:
             int: The arrival time of the client.
         """
@@ -52,7 +50,6 @@ class Client:
     
     def get_tiempo_atencion(self):
         """Returns the attention time for the client.
-
         Returns:
             int: The attention time for the client.
         """

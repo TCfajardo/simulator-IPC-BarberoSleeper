@@ -41,7 +41,6 @@ class Barber:
 
     def get_estado(self):
         """Returns the current state of the barber.
-
         Returns:
             str: The state of the barber ("available", "busy", or "asleep").
         """
