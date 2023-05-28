@@ -24,18 +24,20 @@ class Main:
         self.ventana.mainloop()
 
     def stopSimulation(self):
-        self.barberia.stop()
-        self.activate = False
+        self.barberia.stop
+        self.activate = self.barberia.stop
 
     def startSimulation(self):
         self.activate = True
         try:
-            self.cantidad = int(self.numeroSillas.get())
+            self.cantidad = int(self.numeroSillas.get()) 
             self.barberia.simular_barbero_dormilon(self.cantidad)
+
             self.hiloBarber = threading.Thread(target=self.barber_image, args=())
             self.hiloBarber.start()
             self.hiloChair = threading.Thread(target=self.chairsImages, args=())
             self.hiloChair.start()
+
             self.hiloLogs = threading.Thread(target=self.create_logs, args=())
             self.hiloLogs.start()
             print(self.hiloSimulation.is_alive())
@@ -201,7 +203,7 @@ class Main:
                                               command=self.startSimulation)
         self.bottomStarSimulacion.grid(row=7, column=3, sticky='WE')
         self.bottomStopSimulacion = tk.Button(self.ventana, image=self.imageButtonStopSimulacion, bd=0,
-                                              bg=self.colorFondo, command=self.stopSimulation)
+                                              bg=self.colorFondo, command=self.stopSimulation())
         self.bottomStopSimulacion.grid(row=7, column=4, sticky='WE')
         self.bottomInfoSimulacion = tk.Button(self.ventana, image=self.imageButtonInfoSimulacion, bd=0,
                                               bg=self.colorFondo, command=self.showInfo)
