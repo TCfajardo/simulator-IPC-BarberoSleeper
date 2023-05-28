@@ -17,6 +17,7 @@ class Main:
         self.create_window()
         self.add_components()
         self.create_images()
+        self.create_logs()
         self.barber_img('C:/Users/casti/Documents/GitHub/simulator-IPC-BarberoSleeper/source/sources/images/sleep.png')
         self.activate = False
         #self.ventana.update()
@@ -28,17 +29,28 @@ class Main:
         
 
     def startSimulation(self):
-        self.activate = True
-        self.cantidad = int(self.numeroSillas.get())
-        print(self.cantidad)
-        self.barberia.simular_barbero_dormilon(self.cantidad)
-        self.hiloBarber = threading.Thread(target=self.barber_image, args=())
-        self.hiloBarber.start()
-        self.hiloChair = threading.Thread(target=self.chairsImages, args=())
-        self.hiloChair.start()
+        try:
+            self.cantidad = int(self.numeroSillas.get())
+            self.barberia.simular_barbero_dormilon(self.cantidad)
+            self.hiloBarber = threading.Thread(target=self.barber_image, args=())
+            self.hiloBarber.start()
+            self.hiloChair = threading.Thread(target=self.chairsImages, args=())
+            self.hiloChair.start()
+            self.hiloLogs = threading.Thread(target=self.create_logs, args=())
+            self.hiloLogs.start()
+            print(self.hiloSimulation.is_alive())
+        except ValueError:
+            messagebox.showerror("Error", "Ingrese un valor valido")
         
-        print(self.hiloSimulation.is_alive())
-        #self.update_gui()
+    def showInfo(self):
+        text = "---Instrucciones---\n - Ingrese el numero de asientos totales en la sala de espera en el campo " \
+               "requerido\n - Pulse en el boton de play\n - Si desea pausar la simulación presione el boton de Stop\n\n" \
+               "---Funcionamiento---\nUna vez iniciada la simulación, en el panel izquierdo se adicionaran las sillas " \
+               "ingresadas por el usuario y cambiaran su estado automaticamente cuando llega un nuevo cliente" \
+               " a la barberia, ademas el fondo se pintará de rojo si la sala de espera está llena.\n" \
+               "En el panel derecho se pintará la imagen del barbero con su respectivo estado ya sea durmiendo o " \
+               "atentiendo a un cliente.\n"
+        messagebox.showinfo(title="Información", message=text)
 
 
     def barber_image(self):
@@ -47,7 +59,6 @@ class Main:
             if barber_is_sleep:
                 self.update_barber('C:/Users/casti/Documents/GitHub/simulator-IPC-BarberoSleeper/source/sources/images/sleep.png')
             else:
-                #print("Nooooo_________________________I_________")
                 self.update_barber('C:/Users/casti/Documents/GitHub/simulator-IPC-BarberoSleeper/source/sources/images/barberWakeup.png')
         # Actualizar el tamaño del área desplazable del canvas
 
@@ -58,6 +69,7 @@ class Main:
             sala_espera = self.barberia.get_list()
             if sala_espera == 0:
                 for i in range(self.cantidad):
+                    self.canvas.configure(bg='white')
                     self.canvas.create_image(x, y, anchor='nw', image=self.silla_imag)
                     x += 80
                     if(x == 400):
@@ -66,6 +78,7 @@ class Main:
             elif sala_espera > 0:
                 if sala_espera == self.cantidad:
                     for i in range(self.cantidad):
+                        self.canvas.configure(bg='#F3B3B3')
                         self.canvas.create_image(x,y, anchor='nw', image=self.esperando_imag)
                         self.canvas.image = self.silla_imag
                         x += 80
@@ -74,6 +87,7 @@ class Main:
                             y += 80
             if 0 < sala_espera < self.cantidad:
                 libres = self.cantidad - sala_espera
+                self.canvas.configure(bg='white')
                 for i in range(self.cantidad):
                     if i >= (self.cantidad - libres):
                        self.canvas.create_image(x, y, anchor='nw', image=self.silla_imag)
@@ -125,7 +139,7 @@ class Main:
         self.labelTitulo1=tk.Label(self.ventana,text=self.titleWindow, bg=self.colorFondo, fg=self.colorFuentePrincipal, font=self.fuenteTitulo)
         self.labelTitulo1.grid(row=0, column=1, columnspan=5)
 
-        #Separador
+       #Separador
         self.separador=ttk.Separator(self.ventana,orient='horizontal')
         self.separador.grid(row=0, column=0, sticky='SWE', columnspan=14)
         self.separador2=ttk.Separator(self.ventana,orient='vertical')
@@ -136,16 +150,23 @@ class Main:
         self.separador4.grid(row=5, column=0, sticky='SWE', columnspan=14)
 
         #numero de sillas
-        self.labelEntrySimulacion=tk.Label(self.ventana,text="Numero de sillas: ",border=0, bg=self.colorFondo, fg=self.colorFuentePrincipal, font=('Mixed',15))
+        self.labelEntrySimulacion = tk.Label(self.ventana, text="Numero de sillas: ", border=0, bg=self.colorFondo,
+                                             fg=self.colorFuentePrincipal, font=('Mixed', 15))
         self.labelEntrySimulacion.grid(row=7, column=0, sticky='E', columnspan=2)
-        self.numeroSillas = tk.Entry(self.ventana, fg=self.colorFuentePrincipal, font=('Mixed',15))
+        self.numeroSillas = tk.Entry(self.ventana, fg=self.colorFuentePrincipal, font=('Mixed', 15))
         self.numeroSillas.grid(row=7, column=2, sticky='E')
-        self.imageButtonSimulacion = tk.PhotoImage(file='C:/Users/casti/Documents/GitHub/simulator-IPC-BarberoSleeper/source/sources/images/play.png')
-        self.imageButtonStopSimulacion = tk.PhotoImage(file='C:/Users/casti/Documents/GitHub/simulator-IPC-BarberoSleeper/source/sources/images/stop.png')
-        self.bottomStarSimulacion = tk.Button(self.ventana, image=self.imageButtonSimulacion, bd=0, bg=self.colorFondo, command= self.startSimulation)
+        self.imageButtonSimulacion = tk.PhotoImage(file='sources/images/play.png')
+        self.imageButtonStopSimulacion = tk.PhotoImage(file='sources/images/stop.png')
+        self.imageButtonInfoSimulacion = tk.PhotoImage(file='sources/images/info.png')
+        self.bottomStarSimulacion = tk.Button(self.ventana, image=self.imageButtonSimulacion, bd=0, bg=self.colorFondo,
+                                              command=self.startSimulation)
         self.bottomStarSimulacion.grid(row=7, column=3, sticky='WE')
-        self.bottomStopSimulacion = tk.Button(self.ventana, image=self.imageButtonStopSimulacion, bd=0, bg=self.colorFondo, command= self.stopSimulation)
+        self.bottomStopSimulacion = tk.Button(self.ventana, image=self.imageButtonStopSimulacion, bd=0,
+                                              bg=self.colorFondo, command=self.stopSimulation)
         self.bottomStopSimulacion.grid(row=7, column=4, sticky='WE')
+        self.bottomInfoSimulacion = tk.Button(self.ventana, image=self.imageButtonInfoSimulacion, bd=0,
+                                              bg=self.colorFondo, command=self.showInfo)
+        self.bottomInfoSimulacion.grid(row=7, column=5, sticky='WE')
 
         # Crear el botón para abrir la gráfica
         self.btn_grafica = tk.Button(self.ventana, text="Estadisticas", command=self.showGraphics)
@@ -170,6 +191,30 @@ class Main:
         self.canvas.grid(row=2, column=0,sticky='E', columnspan=2)
         self.canvas.config(bg='white')
         self.canvas.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+   
+    def create_logs(self):
+        scroll = tk.Scrollbar(self.ventana, orient='vertical')
+
+        self.logs = tk.Text(self.ventana, width=60, height=8, background="white", foreground="Black",
+                            yscrollcommand=scroll.set, font=("Helvetica", 12, "bold"))
+        self.logs.config(state='disabled')
+        self.logs.grid(row=3, column=0, sticky='E', columnspan=2)
+        aux_text = " "
+        try:
+            while self.activate:
+                if aux_text != str(self.barberia.get_logs()):
+                    self.logs.config(state='normal')
+                    self.logs.delete(1.0, tk.END)
+                    for i in range(len(self.barberia.get_logs())):
+                        self.logs.insert(tk.END, str(self.barberia.get_logs()[i]))
+                        self.logs.focus_set()
+                        self.logs.see("end")
+                    self.logs.config(state='disabled')
+                scroll.config(command=self.logs.yview)
+                aux_text = str(self.barberia.get_logs())
+                time.sleep(0.7)
+        except AttributeError:
+            print("Error")
 
 
     def update_barber(self, path):
@@ -180,14 +225,16 @@ class Main:
         self.sleepBarber.image = photo  # Actualizar referencia
   
     #Barbero
-    # Cargar la imagen
+
+   # Cargar la imagen
     def barber_img(self, path):
         imagen = Image.open(path)
-        imagen = imagen.resize((200, 300)) 
+        imagen = imagen.resize((200, 300))
         self.sleepBarberImage = ImageTk.PhotoImage(imagen)
-        self.sleepBarber = tk.Label(self.ventana, image=self.sleepBarberImage)
+        self.sleepBarber = tk.Label(self.ventana, image=self.sleepBarberImage, bg="white")
         self.sleepBarber.config(bg='white')
-        self.sleepBarber.grid(row=2, column=2,sticky='E', columnspan=6)
+        self.sleepBarber.grid(row=2, column=2, sticky='E', columnspan=6)
+
 
     def update_gui(self):
         self.crear_imagenes()

@@ -10,6 +10,7 @@ class Cliente:
 
 class Barberia:
     def __init__(self, num_sillas):
+        self.log = []
         self.sala_espera = []
         self.num_sillas = num_sillas
         self.is_sleep = True
@@ -28,10 +29,11 @@ class Barberia:
             self.mutex.release()
 
             self.is_sleep = False
-            time.sleep(1)
-            print(f"Barbero atendiendo al cliente {cliente.id} con un tiempo de atencion de {cliente.tiempo_atencion}")
+            self.log.append(
+                "Barbero atendiendo al cliente " + str(cliente.id) + " con un tiempo de atencion de " + "{:.3}".format(
+                    cliente.tiempo_atencion) + "\n")
             time.sleep(cliente.tiempo_atencion)
-            print(f"Barbero terminó de atender al cliente {cliente.id}")
+            self.log.append("Barbero terminó de atender al cliente " + str(cliente.id) + "\n")
             self.is_sleep = True
 
     def llegada_clientes(self):
@@ -47,14 +49,16 @@ class Barberia:
             if len(self.sala_espera) < self.num_sillas:
                 self.sala_espera.append(cliente)
                 self.sala_espera.sort(key=lambda c: c.tiempo_atencion)  # Ordenar por tiempo de atención
-                print(f"Cliente {cliente.id} llegó a la sala de espera con un tiempo de llegada de {tiempo_llegada}")
+                self.log.append("Cliente " + str(
+                    cliente.id) + " llegó a la sala de espera con un tiempo de llegada de " + "{:.3}".format(
+                    tiempo_llegada) + "\n")
                 self.mutex.release()  # Liberar el semáforo mutex antes de liberar al barbero
                 self.barbero_sem.release()  # Despertar al barbero si estaba dormido\
                 
 
             else:
-                print(f"Cliente {cliente.id} se fue porque la sala de espera está llena")
-                self.mutex.release()
+               self.log.append("Cliente " + str(cliente.id) + " se fue porque la sala de espera está llena \n")
+               self.mutex.release()
             time.sleep(0.1)  # Pausa para permitir que el barbero atienda a los clientes
 
     def simular_barbero_dormilon(self,num_sillas):
@@ -69,5 +73,8 @@ class Barberia:
 
     def get_sleep(self):
         return self.is_sleep
+    
+    def get_logs(self):
+        return self.log
 
 
