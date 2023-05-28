@@ -52,48 +52,40 @@ class Main:
 
     def chairsImages(self):
         while(self.activate):
-            j = 0
-            counter = 0
-            k = 0 
+            x = 0
+            y = 0 
             sala_espera = self.barberia.get_list()
             if sala_espera == 0:
                 for i in range(self.cantidad):
-                    if counter == 5:
-                        j += 50
-                        k = 0
-                        counter = 0
-                    self.canvas.create_image(j, 12 + k * 50, anchor='nw', image=self.silla_imag)
-                    self.canvas.image = self.silla_imag
-                    counter += 1
-                    k += 1
+                    self.canvas.create_image(x, y, anchor='nw', image=self.silla_imag)
+                    x += 80
+                    if(x == 400):
+                        x = 0
+                        y += 80
             elif sala_espera > 0:
                 if sala_espera == self.cantidad:
                     for i in range(self.cantidad):
-                        if counter == 5:
-                            j += 50
-                            k = 0
-                            counter = 0
-                        self.canvas.create_image(j, 12 + k * 50, anchor='nw', image=self.esperando_imag)
+                        self.canvas.create_image(x,y, anchor='nw', image=self.esperando_imag)
                         self.canvas.image = self.silla_imag
-                        counter += 1
-                        k += 1
+                        x += 80
+                        if(x == 400):
+                            x = 0
+                            y += 80
             if 0 < sala_espera < self.cantidad:
                 libres = self.cantidad - sala_espera
                 for i in range(self.cantidad):
-                    if counter == 5:
-                            j += 50
-                            k = 0
-                            counter = 0
                     if i >= (self.cantidad - libres):
-                        self.canvas.create_image(j, 12 + k * 50, anchor='nw', image=self.silla_imag)
-                        self.canvas.image = self.silla_imag
-                        counter += 1
-                        k += 1
+                       self.canvas.create_image(x, y, anchor='nw', image=self.silla_imag)
+                       x += 80
+                       if(x == 400):
+                            x = 0
+                            y += 80
                     else:
-                        self.canvas.create_image(j, 12 + k * 50, anchor='nw', image=self.esperando_imag)
-                        self.canvas.image = self.esperando_imag 
-                        counter += 1
-                        k += 1   
+                       self.canvas.create_image(x, y, anchor='nw', image=self.esperando_imag)
+                       x += 80
+                    if(x == 400):
+                        x = 0
+                        y += 80
 
     def create_components(self):
         self.titleWindow = 'Sleepy barber'
@@ -159,13 +151,14 @@ class Main:
 
     def create_images(self):
         self.imagen_silla = Image.open('sources/images/silla.png')
-        self.imagen_silla = self.imagen_silla.resize((50, 50)) 
+        self.imagen_silla = self.imagen_silla.resize((80, 80)) 
         self.silla_imag = ImageTk.PhotoImage(self.imagen_silla)
         self.imagen_esperando = Image.open('sources/images/esperandojpg.png')
-        self.imagen_esperando = self.imagen_esperando.resize((50, 50)) 
+        self.imagen_esperando = self.imagen_esperando.resize((80, 80)) 
         self.esperando_imag = ImageTk.PhotoImage(self.imagen_esperando)
-        self.canvas = Canvas(self.ventana, width=400, height=300)
+        self.canvas = Canvas(self.ventana, width=400, height=320)
         self.canvas.grid(row=2, column=0,sticky='E', columnspan=2)
+        self.canvas.config(bg='white')
         self.canvas.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
 
 
@@ -175,9 +168,7 @@ class Main:
         photo = ImageTk.PhotoImage(imagen)  # Convertir a PhotoImage
         self.sleepBarber.configure(image=photo)
         self.sleepBarber.image = photo  # Actualizar referencia
-
-
-    
+  
     #Barbero
     # Cargar la imagen
     def barber_img(self, path):
