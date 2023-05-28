@@ -13,11 +13,15 @@ class Barberia:
         self.sala_espera = []
         self.num_sillas = num_sillas
         self.is_sleep = True
+        self.activate = False
         self.mutex = threading.Semaphore(1)  # Semáforo para garantizar exclusión mutua en la sala de espera
         self.barbero_sem = threading.Semaphore(0)  # Semáforo para despertar al barbero cuando llega un cliente
 
+    def stop(self):
+         self.activate = False
+
     def atender_clientes(self):
-        while True:
+        while self.activate:
             self.barbero_sem.acquire()  # El barbero espera a que llegue un cliente
             self.mutex.acquire()
             cliente = self.sala_espera.pop(0)
@@ -31,7 +35,7 @@ class Barberia:
 
     def llegada_clientes(self):
         id_cliente = 1
-        while True:
+        while self.activate:
             tiempo_llegada = random.uniform(2, 4)
             tiempo_atencion = random.uniform(4, 7)
             time.sleep(tiempo_llegada)
@@ -52,6 +56,7 @@ class Barberia:
 
     def simular_barbero_dormilon(self,num_sillas):
         self.num_sillas = num_sillas  # Actualizar el número de sillas
+        self.activate = True
         threading.Thread(target=self.atender_clientes).start()
         threading.Thread(target=self.llegada_clientes).start()
 
