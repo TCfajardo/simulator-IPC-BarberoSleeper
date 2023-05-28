@@ -28,6 +28,7 @@ class Barberia:
             self.mutex.release()
 
             self.is_sleep = False
+            time.sleep(1)
             print(f"Barbero atendiendo al cliente {cliente.id} con un tiempo de atencion de {cliente.tiempo_atencion}")
             time.sleep(cliente.tiempo_atencion)
             print(f"Barbero terminó de atender al cliente {cliente.id}")
@@ -48,7 +49,9 @@ class Barberia:
                 self.sala_espera.sort(key=lambda c: c.tiempo_atencion)  # Ordenar por tiempo de atención
                 print(f"Cliente {cliente.id} llegó a la sala de espera con un tiempo de llegada de {tiempo_llegada}")
                 self.mutex.release()  # Liberar el semáforo mutex antes de liberar al barbero
-                self.barbero_sem.release()  # Despertar al barbero si estaba dormido
+                self.barbero_sem.release()  # Despertar al barbero si estaba dormido\
+                
+
             else:
                 print(f"Cliente {cliente.id} se fue porque la sala de espera está llena")
                 self.mutex.release()

@@ -5,6 +5,7 @@ from PIL import ImageTk, Image
 import os
 from IPC import Barberia
 import time
+import matplotlib.pyplot as plt
 
 class Main:
 
@@ -16,7 +17,7 @@ class Main:
         self.create_window()
         self.add_components()
         self.create_images()
-        self.barber_img('sources/images/sleep.png')
+        self.barber_img('C:/Users/casti/Documents/GitHub/simulator-IPC-BarberoSleeper/source/sources/images/sleep.png')
         self.activate = False
         #self.ventana.update()
         self.ventana.mainloop()
@@ -44,10 +45,10 @@ class Main:
         while(self.activate):
             barber_is_sleep = self.barberia.get_sleep() 
             if barber_is_sleep:
-                self.update_barber('sources/images/sleep.png')
+                self.update_barber('C:/Users/casti/Documents/GitHub/simulator-IPC-BarberoSleeper/source/sources/images/sleep.png')
             else:
                 #print("Nooooo_________________________I_________")
-                self.update_barber('sources/images/barberWakeup.png')
+                self.update_barber('C:/Users/casti/Documents/GitHub/simulator-IPC-BarberoSleeper/source/sources/images/barberWakeup.png')
         # Actualizar el tamaño del área desplazable del canvas
 
     def chairsImages(self):
@@ -92,9 +93,6 @@ class Main:
         self.colorFondo = '#FFFFFF'
         self.colorFuentePrincipal = '#000000'
         self.colorEntry='#F5F5F5'
-        self.mensajeHora='Reloj Sistema:'
-        self.mensajeTSimulacion = 'Tiempo de simulacion'
-        self.mensajeEstadoCpu='Estado CPU: '
         self.mensajeColaProcesos = 'Cola de Procesos en:'
         self.fuenteTitulo =('Mixed',30)
         self.fuentePrincipal =('Mixed,20')
@@ -142,18 +140,30 @@ class Main:
         self.labelEntrySimulacion.grid(row=7, column=0, sticky='E', columnspan=2)
         self.numeroSillas = tk.Entry(self.ventana, fg=self.colorFuentePrincipal, font=('Mixed',15))
         self.numeroSillas.grid(row=7, column=2, sticky='E')
-        self.imageButtonSimulacion = tk.PhotoImage(file='sources/images/play.png')
-        self.imageButtonStopSimulacion = tk.PhotoImage(file='sources/images/stop.png')
+        self.imageButtonSimulacion = tk.PhotoImage(file='C:/Users/casti/Documents/GitHub/simulator-IPC-BarberoSleeper/source/sources/images/play.png')
+        self.imageButtonStopSimulacion = tk.PhotoImage(file='C:/Users/casti/Documents/GitHub/simulator-IPC-BarberoSleeper/source/sources/images/stop.png')
         self.bottomStarSimulacion = tk.Button(self.ventana, image=self.imageButtonSimulacion, bd=0, bg=self.colorFondo, command= self.startSimulation)
         self.bottomStarSimulacion.grid(row=7, column=3, sticky='WE')
         self.bottomStopSimulacion = tk.Button(self.ventana, image=self.imageButtonStopSimulacion, bd=0, bg=self.colorFondo, command= self.stopSimulation)
         self.bottomStopSimulacion.grid(row=7, column=4, sticky='WE')
 
+        # Crear el botón para abrir la gráfica
+        self.btn_grafica = tk.Button(self.ventana, text="Estadisticas", command=self.showGraphics)
+        self.btn_grafica.grid(row=7, column=6, sticky='WE')
+
+        # Crear la figura y los ejes de la gráfica
+        self.fig, self.ax = plt.subplots(figsize=(10, 6))
+        self.linea_grafica, = self.ax.plot([], [])
+        self.ax.set_xlabel('Tiempo')
+        self.ax.set_ylabel('Clientes en espera')
+        self.ax.set_title('Cantidad de clientes en espera a lo largo del tiempo')
+        self.ax.grid(True)
+
     def create_images(self):
-        self.imagen_silla = Image.open('sources/images/silla.png')
+        self.imagen_silla = Image.open('C:/Users/casti/Documents/GitHub/simulator-IPC-BarberoSleeper/source/sources/images/silla.png')
         self.imagen_silla = self.imagen_silla.resize((80, 80)) 
         self.silla_imag = ImageTk.PhotoImage(self.imagen_silla)
-        self.imagen_esperando = Image.open('sources/images/esperandojpg.png')
+        self.imagen_esperando = Image.open('C:/Users/casti/Documents/GitHub/simulator-IPC-BarberoSleeper/source/sources/images/esperandojpg.png')
         self.imagen_esperando = self.imagen_esperando.resize((80, 80)) 
         self.esperando_imag = ImageTk.PhotoImage(self.imagen_esperando)
         self.canvas = Canvas(self.ventana, width=400, height=320)
@@ -182,6 +192,34 @@ class Main:
     def update_gui(self):
         self.crear_imagenes()
         self.ventana.after(500, self.update_gui)
+
+    def showGraphics(self):
+        tiempos = []  # Lista para almacenar los tiempos de actualización
+        clientes_en_espera = []  # Lista para almacenar la cantidad de clientes en espera
+
+        while self.activate:
+            tiempos.append(time.time())
+            clientes_en_espera.append(self.barberia.get_list())
+
+            # Limitar la cantidad de puntos en la gráfica para una mejor visualización
+            if len(tiempos) > 100:
+                tiempos = tiempos[-100:]
+                clientes_en_espera = clientes_en_espera[-100:]
+
+            # Actualizar los datos de la línea de la gráfica
+            self.linea_grafica.set_data(tiempos, clientes_en_espera)
+
+            # Ajustar los límites del eje x para mantener los puntos anteriores visibles
+            self.ax.set_xlim(min(tiempos) - 0.1, max(tiempos) + 0.1)
+            
+            # Redibujar la gráfica
+            self.fig.canvas.draw()
+
+            # Pausa para permitir la interactividad de la ventana de la gráfica
+            plt.pause(0.1)
+
+
+
 
 
 # Ejecutar el bucle principal de la aplicación
