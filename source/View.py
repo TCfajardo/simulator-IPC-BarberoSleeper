@@ -26,6 +26,7 @@ class Main:
         self.barber_img('source\sources\images\sleep.png')
         self.activate = False
         # self.ventana.update()
+        
         self.ventana.mainloop()
 
     def stopSimulation(self):
@@ -45,13 +46,12 @@ class Main:
         try:
             self.cantidad = int(self.numeroSillas.get())
             self.barberia.simular_barbero_dormilon(self.cantidad)
-            self.hiloBarber = threading.Thread(target=self.barber_image, args=())
-            self.hiloBarber.start()
-            self.hiloChair = threading.Thread(target=self.chairsImages, args=())
-            self.hiloChair.start()
-            self.hiloLogs = threading.Thread(target=self.create_logs, args=())
-            self.hiloLogs.start()
-            print(self.hiloSimulation.is_alive())
+            hiloBarber = threading.Thread(target=self.barber_image, args=())
+            hiloBarber.start()
+            hiloChair = threading.Thread(target=self.chairsImages, args=())
+            hiloChair.start()
+            hiloLogs = threading.Thread(target=self.create_logs, args=())
+            hiloLogs.start()
         except ValueError:
             messagebox.showerror("Error", "Ingrese un valor valido")
         # self.update_gui()
@@ -169,11 +169,13 @@ class Main:
         for i in range(1, 14):
             self.ventana.columnconfigure(i, weight=1)
             
-            
+         
     def showGraphicsTimes(self):
         """_summary_
         """
-        while self.activate:
+        counter = 0      
+        self.act2 = True
+        while self.act2:
             plt.clf() 
             variables = ["Promedio Llegada", "Promedio Atencion"]  # Variable names
             avg_times = [self.barberia.calcular_promedio_llegada(), self.barberia.calcular_promedio_atencion()]  # Average times
@@ -189,18 +191,27 @@ class Main:
             plt.xlabel('Variables')
             plt.ylabel('Average Times')
             plt.title('Average Times for Each Variable')
-
-            plt.pause(0.1) 
+            plt.pause(0.1)
+            counter += 1
+            if counter == 1000:
+                self.act2 = False
+        plt.close()
+ 
 
     def showGraphics(self):
         """
         Continuously updates and displays the graph showing the number of unattended clients over time.
 
         """
+        self.act = True
+        def on_close(event):
+            print("Entro")
+            self.act = False
+
         tiempos = []  # Lista para almacenar los tiempos de actualización
         clientes_no_atendidos = []  # Lista para almacenar la cantidad de clientes que no fueron atendidos
 
-        while self.activate:
+        while self.act:
             tiempos.append(time.time())
             clientes_no_atendidos.append(self.barberia.get_clientes_se_fueron())
 
@@ -218,8 +229,13 @@ class Main:
             self.ax.set_ylim(min_y, max_y)
 
             # Pausa para permitir la interactividad de la ventana de la gráfica
-            plt.pause(0.5)   
+            plt.pause(1)
+            self.fig.canvas.mpl_connect('close_event', on_close)
+   
 
+    def showGraphicsThread(self):
+        self.hiloGraphics = threading.Thread(target=self.showGraphics, args=())
+        self.hiloGraphics.start()
 
 
     def add_components(self):
@@ -251,6 +267,7 @@ class Main:
         self.ax.set_ylabel('Clientes que se fueron')
         self.ax.set_title('Cantidad de clientes no atendidos a lo largo del tiempo')
         self.ax.grid(True)
+    
 
         # numero de sillas
         self.labelEntrySimulacion = tk.Label(self.ventana, text="Numero de sillas: ", border=0, bg=self.colorFondo,
@@ -271,6 +288,9 @@ class Main:
                                               bg=self.colorFondo, command=self.showInfo)
         self.bottomInfoSimulacion.grid(row=7, column=5, sticky='WE')
 
+        
+        
+
     def create_images(self):
         """
         Loads and creates image objects for the GUI.
@@ -286,6 +306,7 @@ class Main:
         self.canvas.grid(row=2, column=0, sticky='E', columnspan=2)
         self.canvas.config(bg='white')
         self.canvas.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+
 
     def create_logs(self):
         """
@@ -311,9 +332,13 @@ class Main:
                     self.logs.config(state='disabled')
                 scroll.config(command=self.logs.yview)
                 aux_text = str(self.barberia.get_logs())
-                time.sleep(0.7)
+                time.sleep(0.1)
         except AttributeError:
             print()
+
+    def startStadistics(self):
+        self.hiloGraphicsTimes = threading.Thread(target=self.showGraphicsTimes, args=())
+        self.hiloGraphicsTimes.start()
 
     def update_barber(self, path):
         """
