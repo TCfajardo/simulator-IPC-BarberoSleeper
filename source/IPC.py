@@ -34,6 +34,7 @@ class Barberia:
             barbero_sem (threading.Semaphore): A semaphore for waking up the barber when a customer arrives.
             clientes_se_fueron (int): The count of customers who left without being served.
         """
+        
         self.log = []
         self.waiting_room = []
         self.num_sillas = num_sillas
@@ -42,6 +43,9 @@ class Barberia:
         self.mutex = threading.Semaphore(1)  # Semáforo para garantizar exclusión mutua en la sala de espera
         self.barbero_sem = threading.Semaphore(0)  # Semáforo para despertar al barbero cuando llega un cliente
         self.customers_gone = 0
+        self.arrival_times_sum = 0
+        self.arrival_times_count = 0
+        self.attention_times_sum = 0
 
     def stop(self):
         """
@@ -92,7 +96,10 @@ class Barberia:
         id_cliente = 1
         while self.activate:
             arrival_time = random.uniform(2, 4)
+            self.arrival_times_sum += arrival_time
+            self.arrival_times_count  += 1
             attention_time = random.uniform(4, 7)
+            self.attention_times_sum += attention_time
             time.sleep(arrival_time)
             customer = Cliente(id_cliente, attention_time)
             id_cliente += 1
@@ -167,3 +174,20 @@ class Barberia:
 
         """
         return self.log
+    
+    def calcular_promedio_llegada(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
+        return self.arrival_times_sum/self.arrival_times_count
+
+    def calcular_promedio_atencion(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
+        return self.attention_times_sum/self.arrival_times_count
+

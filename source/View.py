@@ -6,6 +6,7 @@ import os
 from IPC import Barberia
 import time
 import matplotlib.pyplot as plt
+import numpy as np
 
 class Main:
 
@@ -167,6 +168,29 @@ class Main:
         self.ventana.columnconfigure(0, weight=1)
         for i in range(1, 14):
             self.ventana.columnconfigure(i, weight=1)
+            
+            
+    def showGraphicsTimes(self):
+        """_summary_
+        """
+        while self.activate:
+            plt.clf() 
+            variables = ["Promedio Llegada", "Promedio Atencion"]  # Variable names
+            avg_times = [self.barberia.calcular_promedio_llegada(), self.barberia.calcular_promedio_atencion()]  # Average times
+
+            x_pos = np.arange(len(variables))  # x positions for bars
+
+            # Create the bar graph
+            plt.bar(x_pos, avg_times, align='center', alpha=0.5)
+            plt.xticks(x_pos, variables)  # Set the x-axis tick labels
+            plt.yticks(np.arange(min(avg_times) - 1, max(avg_times) + 1, 0.5))
+            for time in avg_times:
+                plt.axhline(time, color='blue', linestyle='dashed')
+            plt.xlabel('Variables')
+            plt.ylabel('Average Times')
+            plt.title('Average Times for Each Variable')
+
+            plt.pause(0.1) 
 
     def showGraphics(self):
         """
@@ -218,7 +242,8 @@ class Main:
         # Crear el botón para abrir la gráfica
         self.btn_grafica = tk.Button(self.ventana, text="Estadisticas", command=self.showGraphics)
         self.btn_grafica.grid(row=7, column=6, sticky='WE')
-
+        self.btn_grafica = tk.Button(self.ventana, text="Tiempos", command=self.showGraphicsTimes)
+        self.btn_grafica.grid(row=7, column=7, sticky='WE') 
         # Crear la figura y los ejes de la gráfica
         self.fig, self.ax = plt.subplots(figsize=(10, 6))
         self.linea_grafica, = self.ax.plot([], [])
